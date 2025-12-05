@@ -1,0 +1,20 @@
+---
+import ManifestoLayout from '../layouts/ManifestoLayout.astro';
+import { getCollection, render } from 'astro:content';
+
+export async function getStaticPaths() {
+  const manifestoEntries = await getCollection('manifesto');
+
+  return manifestoEntries.map((entry) => ({
+    params: { number: String(entry.data.number) },
+    props: { entry },
+  }));
+}
+
+const { entry } = Astro.props;
+const { Content } = await render(entry);
+---
+
+<ManifestoLayout number={entry.data.number} title={entry.data.title}>
+  <Content />
+</ManifestoLayout>

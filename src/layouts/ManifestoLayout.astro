@@ -1,0 +1,184 @@
+---
+import BaseLayout from './BaseLayout.astro';
+import Navigation from '../components/Navigation.svelte';
+import { getCollection } from 'astro:content';
+
+interface Props {
+  number: number;
+  title: string;
+}
+
+const { number, title } = Astro.props;
+
+const allItems = await getCollection('manifesto');
+const sortedItems = allItems
+  .map(item => ({
+    number: item.data.number,
+    title: item.data.title,
+    slug: item.id,
+  }))
+  .sort((a, b) => a.number - b.number);
+
+const totalItems = sortedItems.length;
+const prevNumber = number > 1 ? number - 1 : null;
+const nextNumber = number < totalItems ? number + 1 : null;
+---
+
+<BaseLayout title={`${String(number).padStart(2, '0')}. ${title}`}>
+  <div class="container">
+    <aside class="sidebar">
+      <a href="/" class="logo">Manifesto</a>
+      <Navigation items={sortedItems} currentNumber={number} client:load />
+    </aside>
+
+    <main class="content">
+      <article class="article">
+        <header class="article-header">
+          <span class="article-number">{String(number).padStart(2, '0')}</span>
+          <h1 class="article-title">{title}</h1>
+        </header>
+
+        <div class="article-body">
+          <slot />
+        </div>
+
+        <footer class="article-nav">
+          {prevNumber && (
+            <a href={`/${prevNumber}`} class="article-nav-link prev">
+              <span class="article-nav-label">Previous</span>
+              <span class="article-nav-number">{String(prevNumber).padStart(2, '0')}</span>
+            </a>
+          )}
+          {nextNumber && (
+            <a href={`/${nextNumber}`} class="article-nav-link next">
+              <span class="article-nav-label">Next</span>
+              <span class="article-nav-number">{String(nextNumber).padStart(2, '0')}</span>
+            </a>
+          )}
+        </footer>
+      </article>
+    </main>
+  </div>
+</BaseLayout>
+
+<style>
+  .container {
+    display: grid;
+    grid-template-columns: 290px 1fr;
+    min-height: 100vh;
+  }
+
+  .sidebar {
+    border-right: 1px solid var(--color-border);
+    padding: 2rem 1rem;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+  }
+
+  .logo {
+    display: block;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--color-text);
+    text-decoration: none;
+    padding: 0 1rem;
+    margin-bottom: 1rem;
+  }
+
+  .content {
+    padding: 4rem;
+    max-width: 920px;
+  }
+
+  .article-header {
+    margin-bottom: 3rem;
+  }
+
+  .article-number {
+    display: block;
+    font-size: 0.875rem;
+    font-family: monospace;
+    color: var(--color-muted);
+    margin-bottom: 0.5rem;
+  }
+
+  .article-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+  }
+
+  .article-body {
+    font-size: 1.125rem;
+    color: var(--color-text);
+  }
+
+  .article-body :global(p) {
+    margin-bottom: 1.5rem;
+  }
+
+  .article-body :global(p:first-child) {
+    font-size: 1.25rem;
+    color: var(--color-text);
+  }
+
+  .article-nav {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 4rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--color-border);
+  }
+
+  .article-nav-link {
+    text-decoration: none;
+    color: var(--color-muted);
+    transition: color 0.15s ease;
+  }
+
+  .article-nav-link:hover {
+    color: var(--color-text);
+  }
+
+  .article-nav-link.next {
+    margin-left: auto;
+    text-align: right;
+  }
+
+  .article-nav-label {
+    display: block;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .article-nav-number {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--color-text);
+  }
+
+  @media (max-width: 768px) {
+    .container {
+      grid-template-columns: 1fr;
+    }
+
+    .sidebar {
+      position: relative;
+      height: auto;
+      border-right: none;
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    .content {
+      padding: 2rem;
+    }
+
+    .article-title {
+      font-size: 2rem;
+    }
+  }
+</style>

@@ -1,0 +1,14 @@
+---
+import ManifestoLayout from '../layouts/ManifestoLayout.astro';
+import { getCollection, render } from 'astro:content';
+
+// Get the first manifesto item
+const manifestoEntries = await getCollection('manifesto');
+const sortedEntries = manifestoEntries.sort((a, b) => a.data.number - b.data.number);
+const firstEntry = sortedEntries[0];
+const { Content } = await render(firstEntry);
+---
+
+<ManifestoLayout number={firstEntry.data.number} title={firstEntry.data.title}>
+  <Content />
+</ManifestoLayout>
