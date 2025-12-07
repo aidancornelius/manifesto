@@ -4,12 +4,13 @@ import '../styles/global.css';
 interface Props {
   title: string;
   description?: string;
+  ogImage?: string;
 }
 
-const { title, description = "A manifesto from Sarah Tuhoro and Aidan Cornelius-Bell" } = Astro.props;
+const { title, description = "A manifesto from Sarah Tuhoro and Aidan Cornelius-Bell", ogImage } = Astro.props;
 const fullTitle = `${title} – Manifesto`;
 const siteUrl = "https://m.tuhoro-bell.com";
-const ogImage = `${siteUrl}/og-image.png`;
+const ogImageUrl = ogImage ? `${siteUrl}${ogImage}` : `${siteUrl}/og-image.png`;
 ---
 
 <!doctype html>
@@ -25,14 +26,14 @@ const ogImage = `${siteUrl}/og-image.png`;
     <meta property="og:type" content="website" />
     <meta property="og:title" content={fullTitle} />
     <meta property="og:description" content={description} />
-    <meta property="og:image" content={ogImage} />
+    <meta property="og:image" content={ogImageUrl} />
     <meta property="og:url" content={siteUrl} />
 
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={fullTitle} />
     <meta name="twitter:description" content={description} />
-    <meta name="twitter:image" content={ogImage} />
+    <meta name="twitter:image" content={ogImageUrl} />
   </head>
   <body>
     <slot />

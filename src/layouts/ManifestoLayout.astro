@@ -37,7 +37,7 @@ const prevNumber = number > 1 ? number - 1 : null;
 const nextNumber = number < totalItems ? number + 1 : null;
 ---
 
-<BaseLayout title={`${String(number).padStart(2, '0')}. ${title}`}>
+<BaseLayout title={`${String(number).padStart(2, '0')}. ${title}`} ogImage={`/og/${number}.png`}>
   <div class="container" style={`--item-light-bg: ${itemLightBg}; --item-light-fg: ${itemLightFg}; --item-dark-bg: ${itemDarkBg}; --item-dark-fg: ${itemDarkFg};`}>
     <aside class="sidebar">
       <a href="/" class="logo">
