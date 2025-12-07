@@ -6,9 +6,13 @@ import { getCollection } from 'astro:content';
 interface Props {
   number: number;
   title: string;
+  lightBg?: string;
+  lightFg?: string;
+  darkBg?: string;
+  darkFg?: string;
 }
 
-const { number, title } = Astro.props;
+const { number, title, lightBg, lightFg, darkBg, darkFg } = Astro.props;
 
 const allItems = await getCollection('manifesto');
 const sortedItems = allItems
@@ -16,8 +20,17 @@ const sortedItems = allItems
     number: item.data.number,
     title: item.data.title,
     slug: item.id,
+    lightBg: item.data.lightBg,
+    lightFg: item.data.lightFg,
+    darkBg: item.data.darkBg,
+    darkFg: item.data.darkFg,
   }))
   .sort((a, b) => a.number - b.number);
+
+const itemLightBg = lightBg || '#fff';
+const itemLightFg = lightFg || '#111';
+const itemDarkBg = darkBg || '#111';
+const itemDarkFg = darkFg || '#fff';
 
 const totalItems = sortedItems.length;
 const prevNumber = number > 1 ? number - 1 : null;
@@ -25,9 +38,19 @@ const nextNumber = number < totalItems ? number + 1 : null;
 ---
 
 <BaseLayout title={`${String(number).padStart(2, '0')}. ${title}`}>
-  <div class="container">
+  <div class="container" style={`--item-light-bg: ${itemLightBg}; --item-light-fg: ${itemLightFg}; --item-dark-bg: ${itemDarkBg}; --item-dark-fg: ${itemDarkFg};`}>
     <aside class="sidebar">
-      <a href="/" class="logo">Manifesto</a>
+      <a href="/" class="logo">
+        <span class="logo-icon">
+        <svg width="100%" height="100%" viewBox="0 0 246 246" xmlns="http://www.w3.org/2000/svg" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2;">
+            <path d="M234.504,65.6l-12.002,8.998c-23.513,-31.364 -60.423,-49.824 -99.622,-49.824c-39.575,0 -71.705,32.13 -71.705,71.705c0,39.575 32.13,71.705 71.705,71.705c10.432,0 18.902,-8.47 18.902,-18.902c0,-10.432 -8.47,-18.902 -18.902,-18.902c-18.711,0 -33.902,-15.191 -33.902,-33.902c0,-18.711 15.191,-33.902 33.902,-33.902c47.854,0 86.705,38.851 86.705,86.705c0,47.854 -38.851,86.705 -86.705,86.705c-43.921,0 -85.278,-20.684 -111.624,-55.826l12.002,-8.998c23.513,31.364 60.423,49.824 99.622,49.824c39.575,0 71.705,-32.13 71.705,-71.705c0,-39.575 -32.13,-71.705 -71.705,-71.705c-10.432,0 -18.902,8.47 -18.902,18.902c0,10.432 8.47,18.902 18.902,18.902c18.711,0 33.902,15.191 33.902,33.902c0,18.711 -15.191,33.902 -33.902,33.902c-47.854,0 -86.705,-38.851 -86.705,-86.705c0,-47.854 38.851,-86.705 86.705,-86.705c43.921,0 85.278,20.684 111.624,55.826Z" fill="#00311B"/>
+        </svg>
+        </span>
+        <span class="logo-text-wrap">
+          <span class="logo-text">Manifesto</span>
+          <span class="logo-authors">from Sarah Tuhoro and Aidan Cornelius-Bell</span>
+        </span>
+      </a>
       <Navigation items={sortedItems} currentNumber={number} client:load />
     </aside>
 
@@ -64,32 +87,109 @@ const nextNumber = number < totalItems ? number + 1 : null;
 <style>
   .container {
     display: grid;
-    grid-template-columns: 290px 1fr;
+    grid-template-columns: auto 1fr;
     min-height: 100vh;
   }
 
   .sidebar {
-    border-right: 1px solid var(--color-border);
-    padding: 2rem 1rem;
+    background: var(--color-bg);
+    padding: 2rem 0.5rem;
     position: sticky;
     top: 0;
     height: 100vh;
     overflow-y: auto;
+    overflow-x: hidden;
+    display: flex;
+    flex-direction: column;
+    width: 64px;
+    transition: width 0.25s ease;
+  }
+
+  .sidebar:hover {
+    width: 320px;
+  }
+
+  /* Show titles on sidebar hover */
+  .sidebar:hover :global(.nav-title) {
+    opacity: 1;
+    max-height: 3em;
+    transition-delay: 0.1s;
+  }
+
+  /* Hide active item's extended background when collapsed */
+  .sidebar:not(:hover) :global(.nav-item.active .nav-link) {
+    margin-right: 0;
+    border-radius: 6px;
   }
 
   .logo {
-    display: block;
-    font-size: 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1rem;
     font-weight: 700;
-    color: var(--color-text);
+    color: #00311B;
     text-decoration: none;
-    padding: 0 1rem;
+    padding: 0.5rem;
+    padding-left: 0.5rem;
     margin-bottom: 1rem;
+    white-space: nowrap;
+  }
+
+  .logo-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.5rem;
+    height: 1.5rem;
+    flex-shrink: 0;
+    font-weight: 800;
+  }
+
+  .logo-icon :global(svg) {
+    width: 100%;
+    height: 100%;
+  }
+
+  .logo-text-wrap {
+    display: flex;
+    flex-direction: column;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+  }
+
+  .sidebar:hover .logo-text-wrap {
+    opacity: 1;
+    transition-delay: 0.1s;
+  }
+
+  .logo-text {
+    line-height: 1.2;
+  }
+
+  .logo-authors {
+    font-size: 0.65rem;
+    font-weight: 400;
+    color: var(--color-muted);
   }
 
   .content {
+    background: var(--item-light-bg);
+    color: var(--item-light-fg);
     padding: 4rem;
-    max-width: 920px;
+    padding-left: 3rem;
+    min-height: 100vh;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    .content {
+      background: var(--item-dark-bg);
+      color: var(--item-dark-fg);
+    }
+  }
+
+  .article {
+    max-width: 720px;
   }
 
   .article-header {
@@ -100,7 +200,7 @@ const nextNumber = number < totalItems ? number + 1 : null;
     display: block;
     font-size: 0.875rem;
     font-family: monospace;
-    color: var(--color-muted);
+    opacity: 0.6;
     margin-bottom: 0.5rem;
   }
 
@@ -113,7 +213,6 @@ const nextNumber = number < totalItems ? number + 1 : null;
 
   .article-body {
     font-size: 1.125rem;
-    color: var(--color-text);
   }
 
   .article-body :global(p) {
@@ -122,7 +221,6 @@ const nextNumber = number < totalItems ? number + 1 : null;
 
   .article-body :global(p:first-child) {
     font-size: 1.25rem;
-    color: var(--color-text);
   }
 
   .article-nav {
@@ -130,17 +228,18 @@ const nextNumber = number < totalItems ? number + 1 : null;
     justify-content: space-between;
     margin-top: 4rem;
     padding-top: 2rem;
-    border-top: 1px solid var(--color-border);
+    border-top: 1px solid color-mix(in srgb, currentColor 20%, transparent);
   }
 
   .article-nav-link {
     text-decoration: none;
-    color: var(--color-muted);
-    transition: color 0.15s ease;
+    color: inherit;
+    opacity: 0.7;
+    transition: opacity 0.15s ease;
   }
 
   .article-nav-link:hover {
-    color: var(--color-text);
+    opacity: 1;
   }
 
   .article-nav-link.next {
@@ -158,27 +257,82 @@ const nextNumber = number < totalItems ? number + 1 : null;
   .article-nav-number {
     font-size: 1.5rem;
     font-weight: 600;
-    color: var(--color-text);
   }
 
   @media (max-width: 768px) {
     .container {
       grid-template-columns: 1fr;
+      grid-template-rows: auto 1fr;
     }
 
     .sidebar {
-      position: relative;
-      height: auto;
-      border-right: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 20vh;
+      min-height: 100px;
+      max-height: 160px;
+      overflow-y: auto;
+      z-index: 100;
+      width: 100%;
+      padding: 0.5rem 0.75rem;
       border-bottom: 1px solid var(--color-border);
+      background: var(--color-bg);
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+
+    .sidebar:hover {
+      width: 100%;
+    }
+
+    .logo {
+      margin-bottom: 0;
+      flex-shrink: 0;
+      padding: 0.25rem 0;
+    }
+
+    .logo-icon {
+      width: 1.25rem;
+      height: 1.25rem;
+    }
+
+    .logo-text-wrap {
+      opacity: 1;
+    }
+
+    .logo-text {
+      font-size: 0.85rem;
+    }
+
+    .logo-authors {
+      display: none;
     }
 
     .content {
-      padding: 2rem;
+      padding: 1.5rem;
+      padding-top: calc(20vh + 1rem);
+      border-left: none;
+      margin-left: 0;
+      min-height: 100vh;
     }
 
     .article-title {
-      font-size: 2rem;
+      font-size: 1.75rem;
+    }
+
+    .article-header {
+      margin-bottom: 2rem;
+    }
+
+    .article-body {
+      font-size: 1rem;
+    }
+
+    .article-body :global(p:first-child) {
+      font-size: 1.1rem;
     }
   }
 </style>

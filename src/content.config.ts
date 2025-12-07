@@ -6,6 +6,10 @@ const manifesto = defineCollection({
   schema: z.object({
     number: z.number(),
     title: z.string(),
+    lightBg: z.string().optional(),
+    lightFg: z.string().optional(),
+    darkBg: z.string().optional(),
+    darkFg: z.string().optional(),
   }),
 });
 
